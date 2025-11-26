@@ -17,10 +17,25 @@ export const ImageGenerator = () => {
       return;
     }
 
+    const promptText = prompt.trim();
     setLoading(true);
+    
     try {
+      // Check content filter first
+      const { data: filterData, error: filterError } = await supabase.functions.invoke("content-filter", {
+        body: { content: promptText },
+      });
+
+      if (filterError) throw filterError;
+
+      if (!filterData.allowed) {
+        toast.error(filterData.reason || "Contenido no permitido");
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke("generate-image", {
-        body: { prompt }
+        body: { prompt: promptText }
       });
 
       if (error) throw error;

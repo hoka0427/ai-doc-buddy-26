@@ -17,10 +17,25 @@ export const WikipediaChat = () => {
       return;
     }
 
+    const queryText = query.trim();
     setLoading(true);
+    
     try {
+      // Check content filter first
+      const { data: filterData, error: filterError } = await supabase.functions.invoke("content-filter", {
+        body: { content: queryText },
+      });
+
+      if (filterError) throw filterError;
+
+      if (!filterData.allowed) {
+        toast.error(filterData.reason || "Contenido no permitido");
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke("wikipedia-search", {
-        body: { query }
+        body: { query: queryText }
       });
 
       if (error) throw error;
