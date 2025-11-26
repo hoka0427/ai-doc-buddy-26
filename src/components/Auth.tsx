@@ -9,6 +9,7 @@ import logoHeader from "@/assets/logo-header.png";
 
 export const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [isResetPassword, setIsResetPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,7 +19,14 @@ export const Auth = () => {
     setLoading(true);
 
     try {
-      if (isLogin) {
+      if (isResetPassword) {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/`,
+        });
+        if (error) throw error;
+        toast.success("¡Correo de recuperación enviado! Revisa tu bandeja de entrada.");
+        setIsResetPassword(false);
+      } else if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("¡Bienvenido!");
@@ -41,7 +49,12 @@ export const Auth = () => {
           <img src={logoHeader} alt="UPTT Logo" className="h-20 mx-auto mb-4" />
           <CardTitle className="text-2xl">Sistema Académico UPTT</CardTitle>
           <CardDescription>
-            {isLogin ? "Inicia sesión para continuar" : "Crea tu cuenta"}
+            {isResetPassword 
+              ? "Recupera tu contraseña" 
+              : isLogin 
+              ? "Inicia sesión para continuar" 
+              : "Crea tu cuenta"
+            }
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -56,27 +69,49 @@ export const Auth = () => {
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-              />
-            </div>
+            {!isResetPassword && (
+              <div className="space-y-2">
+                <Label htmlFor="password">Contraseña</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                />
+              </div>
+            )}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Cargando..." : isLogin ? "Iniciar Sesión" : "Registrarse"}
+              {loading 
+                ? "Cargando..." 
+                : isResetPassword 
+                ? "Enviar Correo de Recuperación"
+                : isLogin 
+                ? "Iniciar Sesión" 
+                : "Registrarse"
+              }
             </Button>
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="w-full text-sm text-muted-foreground hover:text-foreground"
-            >
-              {isLogin ? "¿No tienes cuenta? Regístrate" : "¿Ya tienes cuenta? Inicia sesión"}
-            </button>
+            <div className="space-y-2">
+              {!isResetPassword && (
+                <button
+                  type="button"
+                  onClick={() => setIsLogin(!isLogin)}
+                  className="w-full text-sm text-muted-foreground hover:text-foreground"
+                >
+                  {isLogin ? "¿No tienes cuenta? Regístrate" : "¿Ya tienes cuenta? Inicia sesión"}
+                </button>
+              )}
+              {isLogin && (
+                <button
+                  type="button"
+                  onClick={() => setIsResetPassword(!isResetPassword)}
+                  className="w-full text-sm text-muted-foreground hover:text-foreground"
+                >
+                  {isResetPassword ? "Volver al inicio de sesión" : "¿Olvidaste tu contraseña?"}
+                </button>
+              )}
+            </div>
           </form>
         </CardContent>
       </Card>
