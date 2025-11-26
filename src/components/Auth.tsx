@@ -71,7 +71,18 @@ export const Auth = () => {
             </div>
             {!isResetPassword && (
               <div className="space-y-2">
-                <Label htmlFor="password">Contraseña</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Contraseña</Label>
+                  {isLogin && (
+                    <button
+                      type="button"
+                      onClick={() => setIsResetPassword(true)}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      ¿Olvidaste tu contraseña?
+                    </button>
+                  )}
+                </div>
                 <Input
                   id="password"
                   type="password"
@@ -93,7 +104,7 @@ export const Auth = () => {
               }
             </Button>
             <div className="space-y-2">
-              {!isResetPassword && (
+              {!isResetPassword ? (
                 <button
                   type="button"
                   onClick={() => setIsLogin(!isLogin)}
@@ -101,14 +112,16 @@ export const Auth = () => {
                 >
                   {isLogin ? "¿No tienes cuenta? Regístrate" : "¿Ya tienes cuenta? Inicia sesión"}
                 </button>
-              )}
-              {isLogin && (
+              ) : (
                 <button
                   type="button"
-                  onClick={() => setIsResetPassword(!isResetPassword)}
+                  onClick={() => {
+                    setIsResetPassword(false);
+                    setIsLogin(true);
+                  }}
                   className="w-full text-sm text-muted-foreground hover:text-foreground"
                 >
-                  {isResetPassword ? "Volver al inicio de sesión" : "¿Olvidaste tu contraseña?"}
+                  Volver al inicio de sesión
                 </button>
               )}
             </div>
