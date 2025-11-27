@@ -3,9 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, Send } from "lucide-react";
+import { Loader2, Send, Mic, Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
 import { QuickQuestions } from "./QuickQuestions";
+import { useVoiceInput } from "@/hooks/useVoiceInput";
+import { useVoiceOutput } from "@/hooks/useVoiceOutput";
 
 interface Message {
   role: "user" | "assistant";
@@ -17,6 +19,15 @@ export const AIChat = () => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { isListening, transcript, startListening, stopListening, resetTranscript } = useVoiceInput();
+  const { speak, stopSpeaking, isSpeaking } = useVoiceOutput();
+
+  useEffect(() => {
+    if (transcript) {
+      setInput(transcript);
+      resetTranscript();
+    }
+  }, [transcript, resetTranscript]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -35,7 +46,6 @@ export const AIChat = () => {
     setLoading(true);
 
     try {
-      // Check content filter first
       const { data: filterData, error: filterError } = await supabase.functions.invoke("content-filter", {
         body: { content: userMessage },
       });
@@ -44,7 +54,7 @@ export const AIChat = () => {
 
       if (!filterData.allowed) {
         toast.error(filterData.reason || "Contenido no permitido");
-        setMessages((prev) => prev.slice(0, -1)); // Remove user message
+        setMessages((prev) => prev.slice(0, -1));
         setLoading(false);
         return;
       }
@@ -90,7 +100,19 @@ export const AIChat = () => {
                       : "bg-muted"
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm whitespace-pre-wrap flex-1">{message.content}</p>
+                    {message.role === "assistant" && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => isSpeaking ? stopSpeaking() : speak(message.content)}
+                        className="shrink-0"
+                      >
+                        {isSpeaking ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -112,6 +134,13 @@ export const AIChat = () => {
               onKeyPress={(e) => e.key === "Enter" && !loading && handleSend()}
               disabled={loading}
             />
+            <Button
+              onClick={isListening ? stopListening : startListening}
+              variant="outline"
+              disabled={loading}
+            >
+              <Mic className={`h-4 w-4 ${isListening ? 'text-red-500' : ''}`} />
+            </Button>
             <Button onClick={handleSend} disabled={loading}>
               <Send className="h-4 w-4" />
             </Button>
