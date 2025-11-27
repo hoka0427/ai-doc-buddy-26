@@ -21,7 +21,7 @@ export const Auth = () => {
     try {
       if (isResetPassword) {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/`,
+          redirectTo: `${window.location.origin}/reset-password`,
         });
         if (error) throw error;
         toast.success("¡Correo de recuperación enviado! Revisa tu bandeja de entrada.");
