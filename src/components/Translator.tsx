@@ -1,13 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowRightLeft, Loader2, Mic, Volume2, VolumeX } from "lucide-react";
+import { ArrowRightLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { useVoiceInput } from "@/hooks/useVoiceInput";
-import { useVoiceOutput } from "@/hooks/useVoiceOutput";
 
 const LANGUAGES = [
   { code: "español", name: "Español" },
@@ -24,15 +22,6 @@ export const Translator = () => {
   const [sourceLang, setSourceLang] = useState("español");
   const [targetLang, setTargetLang] = useState("inglés");
   const [loading, setLoading] = useState(false);
-  const { isListening, transcript, startListening, stopListening, resetTranscript } = useVoiceInput();
-  const { speak, stopSpeaking, isSpeaking } = useVoiceOutput();
-
-  useEffect(() => {
-    if (transcript) {
-      setText(transcript);
-      resetTranscript();
-    }
-  }, [transcript, resetTranscript]);
 
   const handleTranslate = async () => {
     if (!text.trim()) {
@@ -103,24 +92,12 @@ export const Translator = () => {
           </Select>
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">Texto original</label>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={isListening ? stopListening : startListening}
-            >
-              <Mic className={`h-4 w-4 ${isListening ? 'text-red-500' : ''}`} />
-            </Button>
-          </div>
-          <Textarea
-            placeholder="Escribe el texto a traducir..."
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            className="min-h-[150px]"
-          />
-        </div>
+        <Textarea
+          placeholder="Escribe el texto a traducir..."
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          className="min-h-[150px]"
+        />
 
         <Button onClick={handleTranslate} disabled={loading} className="w-full">
           {loading ? (
@@ -134,21 +111,9 @@ export const Translator = () => {
         </Button>
 
         {translation && (
-          <div className="bg-muted p-4 rounded-lg space-y-2">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1">
-                <h3 className="font-semibold mb-2">Traducción:</h3>
-                <p className="text-sm whitespace-pre-wrap">{translation}</p>
-              </div>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => isSpeaking ? stopSpeaking() : speak(translation)}
-                className="shrink-0"
-              >
-                {isSpeaking ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-              </Button>
-            </div>
+          <div className="bg-muted p-4 rounded-lg">
+            <h3 className="font-semibold mb-2">Traducción:</h3>
+            <p className="text-sm whitespace-pre-wrap">{translation}</p>
           </div>
         )}
       </CardContent>

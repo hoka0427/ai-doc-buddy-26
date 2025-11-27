@@ -1,14 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileUp, Loader2, Send, Mic, Volume2, VolumeX } from "lucide-react";
+import { FileUp, Loader2, Send } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { QuickQuestions } from "./QuickQuestions";
-import { useVoiceInput } from "@/hooks/useVoiceInput";
-import { useVoiceOutput } from "@/hooks/useVoiceOutput";
-import GoogleDriveIntegration from "./GoogleDriveIntegration";
+import { QuickResponses } from "./QuickResponses";
 
 interface Message {
   role: "user" | "assistant";
@@ -21,15 +18,6 @@ export const FileAnalyzer = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [question, setQuestion] = useState("");
   const [loading, setLoading] = useState(false);
-  const { isListening, transcript, startListening, stopListening, resetTranscript } = useVoiceInput();
-  const { speak, stopSpeaking, isSpeaking } = useVoiceOutput();
-
-  useEffect(() => {
-    if (transcript) {
-      setQuestion(transcript);
-      resetTranscript();
-    }
-  }, [transcript, resetTranscript]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -102,16 +90,14 @@ export const FileAnalyzer = () => {
       <Card>
         <CardHeader>
           <CardTitle>Analizador de Archivos</CardTitle>
-          <CardDescription>Sube un archivo local o desde Google Drive para analizarlo</CardDescription>
+          <CardDescription>Sube un archivo para analizarlo con IA</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <GoogleDriveIntegration onFileSelect={(file) => console.log('Selected file:', file)} />
-          
           <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
             <label htmlFor="file-upload" className="cursor-pointer">
               <FileUp className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-sm text-muted-foreground mb-2">
-                Haz clic para seleccionar un archivo local
+                Haz clic para seleccionar un archivo
               </p>
               <p className="text-xs text-muted-foreground">
                 Máximo 5MB
@@ -145,19 +131,7 @@ export const FileAnalyzer = () => {
                         : "bg-card mr-8"
                     }`}
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm whitespace-pre-wrap flex-1">{msg.content}</p>
-                      {msg.role === "assistant" && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => isSpeaking ? stopSpeaking() : speak(msg.content)}
-                          className="shrink-0"
-                        >
-                          {isSpeaking ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                        </Button>
-                      )}
-                    </div>
+                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                   </div>
                 ))}
                 {loading && (
@@ -181,30 +155,21 @@ export const FileAnalyzer = () => {
                   rows={2}
                   disabled={loading}
                 />
-                <div className="flex flex-col gap-2">
-                  <Button
-                    onClick={isListening ? stopListening : startListening}
-                    variant="outline"
-                    size="icon"
-                    disabled={loading}
-                  >
-                    <Mic className={`h-4 w-4 ${isListening ? 'text-red-500' : ''}`} />
-                  </Button>
-                  <Button
-                    onClick={handleAskQuestion}
-                    disabled={loading || !question.trim()}
-                    size="icon"
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
+                <Button
+                  onClick={handleAskQuestion}
+                  disabled={loading || !question.trim()}
+                  size="icon"
+                  className="h-auto"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           )}
         </CardContent>
       </Card>
 
-      <QuickQuestions onSelect={(content) => setQuestion(content)} />
+      <QuickResponses onSelect={(content) => setQuestion(content)} />
     </div>
   );
 };

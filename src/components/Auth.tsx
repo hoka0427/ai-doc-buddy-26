@@ -21,7 +21,7 @@ export const Auth = () => {
     try {
       if (isResetPassword) {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/reset-password`,
+          redirectTo: `${window.location.origin}/`,
         });
         if (error) throw error;
         toast.success("¡Correo de recuperación enviado! Revisa tu bandeja de entrada.");
@@ -71,18 +71,7 @@ export const Auth = () => {
             </div>
             {!isResetPassword && (
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Contraseña</Label>
-                  {isLogin && (
-                    <button
-                      type="button"
-                      onClick={() => setIsResetPassword(true)}
-                      className="text-xs text-primary hover:underline"
-                    >
-                      ¿Olvidaste tu contraseña?
-                    </button>
-                  )}
-                </div>
+                <Label htmlFor="password">Contraseña</Label>
                 <Input
                   id="password"
                   type="password"
@@ -104,7 +93,7 @@ export const Auth = () => {
               }
             </Button>
             <div className="space-y-2">
-              {!isResetPassword ? (
+              {!isResetPassword && (
                 <button
                   type="button"
                   onClick={() => setIsLogin(!isLogin)}
@@ -112,16 +101,14 @@ export const Auth = () => {
                 >
                   {isLogin ? "¿No tienes cuenta? Regístrate" : "¿Ya tienes cuenta? Inicia sesión"}
                 </button>
-              ) : (
+              )}
+              {isLogin && (
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsResetPassword(false);
-                    setIsLogin(true);
-                  }}
+                  onClick={() => setIsResetPassword(!isResetPassword)}
                   className="w-full text-sm text-muted-foreground hover:text-foreground"
                 >
-                  Volver al inicio de sesión
+                  {isResetPassword ? "Volver al inicio de sesión" : "¿Olvidaste tu contraseña?"}
                 </button>
               )}
             </div>
