@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
-import { QuickResponses } from "./QuickResponses";
+import { QuickQuestions } from "./QuickQuestions";
 
 interface Message {
   role: "user" | "assistant";
@@ -119,7 +119,7 @@ export const AIChat = () => {
         </CardContent>
       </Card>
 
-      <QuickResponses onSelect={(content) => setInput(content)} />
+      <QuickQuestions onSelect={(content) => setInput(content)} />
     </div>
   );
 };

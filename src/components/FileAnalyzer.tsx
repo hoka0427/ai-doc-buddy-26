@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { FileUp, Loader2, Send } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { QuickResponses } from "./QuickResponses";
+import { QuickQuestions } from "./QuickQuestions";
 
 interface Message {
   role: "user" | "assistant";
@@ -169,7 +169,7 @@ export const FileAnalyzer = () => {
         </CardContent>
       </Card>
 
-      <QuickResponses onSelect={(content) => setQuestion(content)} />
+      <QuickQuestions onSelect={(content) => setQuestion(content)} />
     </div>
   );
 };
